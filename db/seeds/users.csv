@@ -1,0 +1,4 @@
+username,password,role_id,email,notified_at,authentication_key
+administrator,password,1,webmaster@september-rain.com,1234567890
+operator,password,2,operator@september-rain.com,1234567890
+dummy_boy,password,3,sato.dummy_boy@example.com,1234567890

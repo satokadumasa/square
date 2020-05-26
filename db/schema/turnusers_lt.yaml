@@ -1,0 +1,25 @@
+turnusers_lt:
+    realm: 
+      type: strung
+      length: 127
+      null: true
+      key: true
+      default: ""
+    name: 
+      type: strung
+      length: 512
+      null: true
+      key: true
+      default: ""
+    hmackey: 
+      type: strung
+      length: 128
+      null: true
+      key: ""
+      default: ""
+    hmackey: 
+      type: strung
+      length: 128
+      null: true
+      key: ""
+      default: ""

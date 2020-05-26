@@ -1,0 +1,4 @@
+user_id,first_name,last_name,pref_id,city_id,address
+1,administrator,（管理者）,120006,121002,Kanegasaku
+2,operator,（オペレータ）,120006,121002,Kanegasaku
+3,ダミー,ユーザ,120006,121002,Kanegasaku

@@ -1,0 +1,37 @@
+meeting_rtc_sessions:
+  id:
+    type: int
+    length: 10
+    null: false
+    key: PRI
+    default: null
+  user_id:
+    type: int
+    length: 10
+    null: false
+    key: ""
+    default: ""
+  meeting_id:
+    type: int
+    length: 10
+    null: false
+    key: ""
+    default: ""
+  rtc_session_id:
+    type: int
+    length: 10
+    null: false
+    key: ""
+    default: ""
+  created_at:
+    type: datetime
+    length: 19
+    null: 'false'
+    key: ""
+    default: null
+  modified_at:
+    type: datetime
+    length: 19
+    null: 'false'
+    key: ""
+    default: null

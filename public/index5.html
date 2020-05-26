@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>
+  書庫セラエノ
+  Meeting Room
+</title>
+<link rel="shortcut icon" href="/favicon.ico" type="image/vnd.microsoft.icon">
+<link rel="stylesheet" href="/css/default.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script type="text/javascript">
+var userid = null;
+var passwd = null;
+</script>
+</head>
+<body>
+<div id="document_root">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-8 site_title">
+                書庫セラエノ
+            </div>
+            <div class="col-4 site_title">
+                    <div class="btn-group">
+      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+       System Menu
+      </button>
+      <div class="dropdown-menu">
+          <a href='/logout/' class='dropdown-item'>Logout</a>
+          <a href='/User/edit/4/' class='dropdown-item'>UserEdit</a>
+          <a href="/UserInfo/create/" class="dropdown-item">UserInfo</a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="#">その他リンク</a>
+      </div><!-- /.dropdown-menu -->
+    </div><!-- /.btn-group -->
+            </div>
+        </div>
+        <div class="row contents">
+            <div class="col-sm-12 col-md-12 col-lg-3 col-xl-2 side_menu">
+            <div class="col-sm-12 col-md-12 col-lg-4 col-xl-3 side_menu">
+                <div class="side_menu_title">
+                    SIDEMENU
+                </div>
+                <div class="side_menu_item">
+                    SIDEMENU1
+                </div>
+            </div>
+            </div>
+            <div class="col-sm-12 col-md-12 col-lg-9 col-xl-8 details">
+              <form>
+              <div class='row'>
+                <div class='col-sm-4 col-md-4 col-lg-3 col-xl-3'>
+                  USERNAME
+                </div>
+                <div class='col-sm-9 col-md-8 col-lg-9 col-xl-9'>
+
+
+                </div>
+              </div>
+              <div class='row'>
+                <div class='col-sm-4 col-md-4 col-lg-3 col-xl-3'>
+                  PASSWORD
+                </div>
+                <div class='col-sm-9 col-md-8 col-lg-9 col-xl-9'>
+                  *********
+
+                </div>
+              </div>
+              </form>
+              <div class='row'>
+                <div class='col-sm-12 col-md-12 col-lg-12 col-xl-12'>
+                  <input type="checkbox" id="use_video" checked="1">use Video</input>
+                  <input type="checkbox" id="use_audio" checked="1">use Audio</input>
+                  <button type="button" onclick="startVideo();">Start Media</button>
+                  <button type="button" onclick="stopVideo();">Stop Media</button>
+                  &nbsp;
+                  <input type="checkbox" id="send_only">send only</input>
+                  <button type="button" onclick="connect();">Connect</button>
+                  <button type="button" onclick="hangUp();">Hang Up</button>
+                  <div>
+                    <video id="local_video" autoplay style="width: 160px; height: 120px; border: 1px solid black;"></video>
+                    <video id="remote_video" autoplay style="width: 160px; height: 120px; border: 1px solid black;"></video>
+                  </div>
+                  <p>SDP to send:&nbsp;
+                    <button type="button" onclick="copySdp();">copy local SDP</button><br />
+                    <textarea id="text_for_send_sdp" rows="5" cols="60" readonly="readonly">SDP to send</textarea>
+                  </p>
+                  <p>SDP to receive:&nbsp;
+                    <button type="button" onclick="onSdpText();">Receive remote SDP</button><br />
+                    <textarea id="text_for_receive_sdp" rows="5" cols="60"></textarea>
+                  </p>
+                </div>
+              </div>
+
+
+              <div class='row'>
+                <div class='col-sm-12 col-md-12 col-lg-4 col-xl-4'>
+                  Meeting user_id
+                </div>
+                <div class='col-sm-12 col-md-12 col-lg-8 col-xl-8'>
+                  4
+                </div>
+              </div>
+              <div class='row'>
+                <div class='col-sm-12 col-md-12 col-lg-4 col-xl-4'>
+                  Meeting title
+                </div>
+                <div class='col-sm-12 col-md-12 col-lg-8 col-xl-8'>
+                  Susanoo's Meeting
+                </div>
+              </div>
+              <div class='row'>
+                <div class='col-sm-12 col-md-12 col-lg-4 col-xl-4'>
+                  Meeting password
+                </div>
+                <div class='col-sm-12 col-md-12 col-lg-8 col-xl-8'>
+                  *******
+                </div>
+              </div>
+              <div class='row'>
+                <div class='col-sm-12 col-md-12 col-lg-4 col-xl-4'>
+                  Meeting last_connected_at
+                </div>
+                <div class='col-sm-12 col-md-12 col-lg-8 col-xl-8'>
+                  
+                </div>
+              </div>
+              <hr>
+              <div class="row">
+                <div class="col-sm-4">
+                  <A HREF="/Meeting/index/">INDEX</A>
+                </div>
+                <div class="col-sm-4">
+                  <A HREF="/Meeting/edit/1/">EDIT</A>
+                </div>
+                <div class="col-sm-4">
+                  <A HREF="/Meeting/delete/1/">DELETE</A>
+                </div>
+              </div>
+              <script src="/js/webrtc.js" type="text/javascript"></script>
+            </div>
+            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-2 left_contents">
+                OTHERS
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                Powered by <a href="http://selaeno.com/">Selaeno.com</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>

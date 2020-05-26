@@ -1,0 +1,55 @@
+user_infos:
+  id:
+    type: int
+    length: 10
+    null: false
+    key: ""
+    default: ""
+  user_id:
+    type: int
+    length: 10
+    null: false
+    key: ""
+    default: ""
+  first_name:
+    type: string
+    length: 64
+    null: false
+    key: ""
+    default: ""
+  last_name:
+    type: string
+    length: 64
+    null: false
+    key: ""
+    default: ""
+  pref_id:
+    type: int
+    length: 10
+    null: false
+    key: ""
+    default: ""
+  city_id:
+    type: int
+    length: 10
+    null: false
+    key: ""
+    default: ""
+  address:
+    type: string
+    length: 64
+    null: false
+    key: ""
+    default: ""
+  created_at:
+    type: datetime
+    length: 19
+    null: 'false'
+    key: ""
+    default: null
+  modified_at:
+    type: datetime
+    length: 19
+    null: 'false'
+    key: ""
+    default: null

@@ -1,0 +1,6 @@
+php ./stranger.php migrate:create:schema localhost:utf8:bamboo:si118xjas:square
+php ./stranger.php migrate:init
+php ./stranger.php -g scaffold status name:string:32:false::
+php ./stranger.php -g scaffold rooms name:string:128:false:: description:text:1000:true:: name:string:128:false:: max_user:int:10:false:: status_id:int:10:false:: 
+php ./stranger.php -g scaffold room_users room_id:int:10:false:: user_id:int:10:true:: name:string:128:false:: max_user:int:10:false:: status_id:int:10:false:: 
+php ./stranger.php -g scaffold queues offer_user_id:int:10:false:: receive_user_id:int:10:false:: text_for_receive_sdp:text:3000:false:: status_id:int:10:false:: address:string:64:false:: 

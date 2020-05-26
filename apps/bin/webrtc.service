@@ -1,0 +1,14 @@
+[Unit]
+Description=WebRtc Service
+After=network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=oneshot
+PIDFile=/run/webrtc.pid
+ExecStart=php /home/ksato/Project/square/apps/bin/webrtc.php
+ExecReload=/bin/kill -s HUP $MAINPID
+KillSignal=SIGQUIT
+TimeoutStopSec=5
+KillMode=process
+PrivateTmp=true
+

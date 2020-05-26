@@ -1,0 +1,49 @@
+meetings:
+  id:
+    type: int
+    length: 10
+    null: false
+    key: PRI
+    default: null
+  user_id:
+    type: int
+    length: 10
+    null: false
+    key: ""
+    default: ""
+  title:
+    type: string
+    length: 128
+    null: false
+    key: ""
+    default: ""
+  meeting_hash_key:
+    type: string
+    length: 128
+    null: false
+    key: ""
+    default: ""
+  password:
+    type: string
+    length: 128
+    null: true
+    key: ""
+    default: ""
+  last_connected_at:
+    type: datetime
+    length: 19
+    null: false
+    key: ""
+    default: ""
+  created_at:
+    type: datetime
+    length: 19
+    null: 'false'
+    key: ""
+    default: null
+  modified_at:
+    type: datetime
+    length: 19
+    null: 'false'
+    key: ""
+    default: null
