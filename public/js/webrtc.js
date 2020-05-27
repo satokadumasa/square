@@ -1,4 +1,8 @@
+var micList = document.getElementById("mic_list");
 let localVideo = document.getElementById('local_video');
+var cameraList = document.getElementById("camera_list");
+var speakerList = document.getElementById("speaker_list");
+
 let remoteVideo = document.getElementById('remote_video');
 let localStream = null;
 let peerConnection = null;
@@ -6,8 +10,8 @@ let textForSendSdp = document.getElementById('text_for_send_sdp');
 let textToReceiveSdp = document.getElementById('text_for_receive_sdp');
 
 // --- prefix -----
-navigator.getUserMedia  = navigator.getUserMedia    || navigator.webkitGetUserMedia ||
-                          navigator.mozGetUserMedia || navigator.msGetUserMedia;
+// navigator.getUserMedia  = navigator.getUserMedia    || navigator.webkitGetUserMedia ||
+//                           navigator.mozGetUserMedia || navigator.msGetUserMedia;
 RTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
 RTCSessionDescription = window.RTCSessionDescription || window.webkitRTCSessionDescription || window.mozRTCSessionDescription;
 
@@ -15,16 +19,119 @@ RTCSessionDescription = window.RTCSessionDescription || window.webkitRTCSessionD
 $(function(){
   username = $.cookie("username");
   passwd = $.cookie("password");
-  // $('#text_for_receive_sdp').change(function(){
-  //   onSdpText();
-  // });
   $("#username").text(username);
-  startVideo();
+  getDeviceList();
+  // startVideo();
   $('#status').prepend('<div id="status_disp" style="color: read;">WAIT</div>');
   $("#connect").prop("disabled", true);
-  // sleep(5000);
   checkSdp();
 });
+
+/*****
+ * デバイスリストのクリア
+ */
+function clearDeviceList() {
+  while(micList.lastChild) {
+    micList.removeChild(micList.lastChild);
+  }
+  while(cameraList.lastChild) {
+    cameraList.removeChild(cameraList.lastChild);
+  }
+  while(speakerList.lastChild) {
+    speakerList.removeChild(speakerList.lastChild);
+  }
+}
+
+/*****
+ * デバイスリストの更新
+ */
+function addDevice(device) {
+  if (device.kind === 'audioinput') {
+    var id = device.deviceId;
+    var label = device.label || 'microphone'; // label is available for https 
+    var option = document.createElement('option');
+    option.setAttribute('value', id);
+    option.innerHTML = label + '(' + id + ')';;
+    micList.appendChild(option);
+  }
+  else if (device.kind === 'videoinput') {
+    var id = device.deviceId;
+    var label = device.label || 'camera'; // label is available for https 
+
+    var option = document.createElement('option');
+    option.setAttribute('value', id);
+    option.innerHTML = label + '(' + id + ')';
+    cameraList.appendChild(option);
+  }
+  else if (device.kind === 'audiooutput') {
+    var id = device.deviceId;
+    var label = device.label || 'speaker'; // label is available for https 
+
+    var option = document.createElement('option');
+    option.setAttribute('value', id);
+    option.innerHTML = label + '(' + id + ')';
+    speakerList.appendChild(option);   
+  }
+  else {
+    console.error('UNKNOWN Device kind:' + device.kind);
+  }
+}
+
+/*****
+ * 利用デバイスの取得
+ */
+function getDeviceList() {
+  clearDeviceList();
+  navigator.mediaDevices.enumerateDevices()
+  .then(function(devices) {
+    devices.forEach(function(device) {
+    console.log(device.kind + ": " + device.label + " id = " + device.deviceId);
+    addDevice(device);
+    });
+  })
+  .catch(function(err) {
+    console.error('enumerateDevide ERROR:', err);
+  });
+}
+
+/*****
+ * 使用カメラの取得
+ */
+function getSelectedVideo() {
+  var id = cameraList.options[cameraList.selectedIndex].value;
+  return id;
+}
+
+/*****
+ * 使用マイクの取得
+ */
+function getSelectedAudio() {
+  var id = micList.options[micList.selectedIndex].value;
+  return id;
+}
+
+/*****
+ * 使用スピーカーの取得
+ */
+function getSelectedSpeaker() {
+  var id = speakerList.options[speakerList.selectedIndex].value;
+  return id;
+}
+
+/*****
+ * スピーカーの設定
+ */
+function setSpeaker() {
+  var speakerId = getSelectedSpeaker();
+  localVideo.volume = 0;
+  localVideo.setSinkId(speakerId)
+  .then(function() {
+    console.log('setSinkID Success');
+  })
+  .catch(function(err) {
+    console.error('setSinkId Err:', err);
+  });
+}
 
 function isUseVideo() {
   let useVideo = document.getElementById('use_video').checked;
@@ -39,6 +146,54 @@ function isUseAudio() {
 function isSendOnly() {
   let sendOnly = document.getElementById('send_only').checked;
   return sendOnly;
+}
+
+function startFakeVideo() {
+  var constraints = {video: true, fake: true, audio: false};
+  navigator.mediaDevices.getUserMedia(
+    constraints
+  ).then(function(stream) {
+    localStream = stream;
+    logStream('selectedVideo', stream);
+    localVideo.srcObject = stream;
+  }).catch(function(err){
+    console.error('getUserMedia Err:', err);
+  });
+}
+
+function startSelectedVideoAudio() {
+  var audioId = getSelectedAudio();
+  var deviceId = getSelectedVideo();
+  console.log('selected video device id=' + deviceId + ' ,  audio=' + audioId);
+  var constraints = {
+    audio: {
+      deviceId: audioId
+    },
+    video: { 
+      deviceId: deviceId
+    },
+    echoCancellation: true,
+    echoCancellationType: "system",
+    sampleRate: 48000,
+    sampleSize: 16,
+    volume: 0.5411764705882353,
+  };
+  console.log('mediaDevice.getMedia() constraints:', constraints);
+
+  navigator.mediaDevices.getUserMedia(
+   constraints
+  ).then(function(stream) {
+    localStream = stream;
+    logStream('selectedVideo', stream);
+    localVideo.srcObject = stream;
+    // playVideo(localVideo, stream);
+    $('#status_disp').remove();
+    $('#status').prepend('<div id="status_disp" style="color: grean;">READY</div>');
+    $("#connect").prop("disabled", false);
+
+  }).catch(function(err){
+    console.error('getUserMedia Err:', err);
+  });
 }
 
 // start local video
@@ -205,9 +360,6 @@ function onSdpText() {
 function sendSdp(sessionDescription) {
   console.log('---sending sdp ---');
   textForSendSdp.value = sessionDescription.sdp;
-  // textForSendSdp.focus();
-  // textForSendSdp.select();
-  // var meeting_id = $("#meeting_id").val();
   var sdp = sessionDescription.sdp;
 
   var data = {
@@ -244,9 +396,9 @@ function prepareNewConnection() {
   var peer = null;
   let pc_config = {
     "iceServers": [
-      // {
-      //   "url":"stun:september-rain.com:3478"
-      // },
+      {
+        "url":"stun:september-rain.com:3478"
+      },
       {
         "url": "turn:september-rain.com:3478?transport=udp",
         "credential": passwd,
