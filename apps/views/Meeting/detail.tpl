@@ -38,7 +38,7 @@
               <div class='row'>
                 <div class='col-sm-12 col-md-12 col-lg-12 col-xl-12'>
                   <button id="start_video_button" onclick="startSelectedVideoAudio()">Start Selected Video/Audio</button>
-                  <button id="stop_button" onclick="stopVideoStream()">StopVideo</button>
+                  <button id="stop_button" onclick="stopVideo()">StopVideo</button>
                   <!--
                   <button id="speaker_button" onclick="setSpeaker()">SetSpeaker</button>
                   <button id="speaker_button" onclick="startFakeVideo()">start Fake video</button>
