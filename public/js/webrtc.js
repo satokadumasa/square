@@ -172,11 +172,11 @@ function startSelectedVideoAudio() {
     video: { 
       deviceId: deviceId
     },
-    echoCancellation: true,
-    echoCancellationType: "system",
-    sampleRate: 48000,
-    sampleSize: 16,
-    volume: 0.5411764705882353,
+    // echoCancellation: true,
+    // echoCancellationType: "system",
+    // sampleRate: 48000,
+    // sampleSize: 16,
+    // volume: 0.5411764705882353,
   };
   console.log('mediaDevice.getMedia() constraints:', constraints);
 
@@ -316,7 +316,7 @@ function playVideo(element, stream) {
     element.src = window.URL.createObjectURL(stream);
   }
   element.play();
-  element.volume = 0;
+  element.volume = 0.5411764705882353;
 }
 
 function pauseVideo(element) {
