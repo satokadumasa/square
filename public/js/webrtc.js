@@ -2,16 +2,16 @@ var micList = document.getElementById("mic_list");
 let localVideo = document.getElementById('local_video');
 var cameraList = document.getElementById("camera_list");
 var speakerList = document.getElementById("speaker_list");
-
 let remoteVideo = document.getElementById('remote_video');
 let localStream = null;
 let peerConnection = null;
+
 let textForSendSdp = document.getElementById('text_for_send_sdp');
 let textToReceiveSdp = document.getElementById('text_for_receive_sdp');
 
 // --- prefix -----
-// navigator.getUserMedia  = navigator.getUserMedia    || navigator.webkitGetUserMedia ||
-//                           navigator.mozGetUserMedia || navigator.msGetUserMedia;
+navigator.getUserMedia  = navigator.getUserMedia    || navigator.webkitGetUserMedia ||
+                          navigator.mozGetUserMedia || navigator.msGetUserMedia;
 RTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
 RTCSessionDescription = window.RTCSessionDescription || window.webkitRTCSessionDescription || window.mozRTCSessionDescription;
 
