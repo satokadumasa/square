@@ -10,10 +10,6 @@ $(function(){
 		}).done(function(data,status,jqXHR) {
 			var username = $("#username").val();
 			var password = $("#password").val();
-			var data = {
-				"username": username,
-				"password": password
-			};
 			$.cookie("username", username, { expires: 7 , path: '/', domain: 'september-rain.com'});
 			$.cookie("password", password, { expires: 7 , path: '/', domain: 'september-rain.com'});
 		  userid = $.cookie("username");

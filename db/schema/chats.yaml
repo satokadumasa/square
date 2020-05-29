@@ -1,0 +1,31 @@
+chats:
+  id:
+    type: int
+    length: 10
+    null: false
+    key: PRI
+    default: null
+  user_id:
+    type: int
+    length: 10
+    null: false
+    key: ""
+    default: ""
+  body:
+    type: text
+    length: 3000
+    null: false
+    key: ""
+    default: ""
+  created_at:
+    type: datetime
+    length: 19
+    null: 'false'
+    key: ""
+    default: null
+  modified_at:
+    type: datetime
+    length: 19
+    null: 'false'
+    key: ""
+    default: null

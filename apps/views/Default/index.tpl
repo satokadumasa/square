@@ -1,4 +1,6 @@
-<h1><!----value:action_name----></h1>
-#Write contents here#<br>StrangerPHP デフォルトホームページ<br>
-ここにコンテンツを追記していってください。<br>
-
+              <h1>Meeting Rooms</h1>
+              <div class='row' id="meeting">
+                <div id="meeting_list">
+                </div>
+              </div>
+              <script src="/js/main.js"></script>

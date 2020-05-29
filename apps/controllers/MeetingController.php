@@ -117,9 +117,72 @@ class MeetingController extends \strangerfw\core\controller\BaseController{
       $this->dbh->commit();
       $url = BASE_URL . 'Meeting' . '/index/';
     } catch (\Exception $e) {
-      $this->debug->log("UsersController::delete() error:" . $e->getMessage());
+      $this->debug->log("MeetingController::delete() error:" . $e->getMessage());
     }
   }
 
+  public function list() {
+    $this->debug->log("MeetingController::list() START");
+    $request = json_decode($this->request);
+    $this->debug->log("MeetingController::list() request:" . print_r($request, true));
 
-}
+    $meeting = new Meeting($this->dbh);
+    $limit = 10;
+    $offset = 10 * (isset($this->request['page']) ? $this->request['page'] - 1 : 0);
+
+    $meetings = $meeting->where('Meeting.id', '>', 0)->limit($limit)->offset($offset)->find('all');
+
+    $ref = isset($this->request['page']) && ($this->request['page'] - 1 > 0) ? ($this->request['page'] - 1) : 0;
+    $next = isset($this->request['page']) && ($this->request['page'] > 0) ? $this->request['page'] + 1 : 2;
+
+    $data = [
+      "meetings" => $meetings,
+      "ref" => $ref,
+      "next" => $next,
+    ];
+    $this->debug->log("MeetingController::list() data:" . print_r($data, true));
+
+    echo json_encode($data, JSON_UNESCAPED_UNICODE);
+    exit();
+  }
+
+  public function get_meeting_detail() {
+    $data = null;
+    $id = $this->request['meeting_id'];
+    $this->debug->log("MeetingController::detail() request:".print_r($this->request, true));
+
+    $meetings = new Meeting($this->dbh);
+    try {
+      $meeting = $meetings->contain([
+        'MeetingRtcSession' => [
+          'RtcSession',
+        ],
+      ])
+      ->select([
+        'Meeting' => [
+          'id',
+          'user_id',
+          'title',
+          'meeting_hash_key',
+        ],
+        'RtcSession' => [
+          'sdp',
+          'status',
+        ]
+      ])
+      ->where('Meeting.id', '=', $id)->find('first');
+
+      $data = [
+        'meeting' => $meeting,
+      ];
+
+      $this->debug->log("MeetingController::detail() data:".print_r($data, true));
+      echo json_encode($data, JSON_UNESCAPED_UNICODE);
+
+    } catch (\Exception $e) {
+      $this->debug->log("MeetingController::detail() error:" . $e->getMessage());
+      $this->set('Title', 'Meeting Room');
+      $this->set('Meeting', $data['Meeting']);
+      $this->set('data', $data);
+    }
+  }}

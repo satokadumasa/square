@@ -374,7 +374,7 @@ function sendSdp(sessionDescription) {
     timespan:1000
   }).done(function(revive_data,status,jqXHR) {
     // var send_data = "username=" + username + ":meeting_id=" + meeting_id;
-    // settings['conn'].send(send_data);        
+    // settings['conn'].send(send_data);
     settings['conn'].send(JSON.stringify({command: "message", meeting_id: meeting_id, username: username }));
   }).fail(function(jqXHR, status, errorThrown ) {
   }).always(function(){
