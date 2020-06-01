@@ -161,11 +161,11 @@ function isUseAudio() {
   return useAudio;
 }
 
-function isSendOnly() {
-  console.log('isSendOnly() ');
-  let sendOnly = document.getElementById('send_only').checked;
-  return sendOnly;
-}
+// function isSendOnly() {
+//   console.log('isSendOnly() ');
+//   let sendOnly = document.getElementById('send_only').checked;
+//   return sendOnly;
+// }
 
 function startFakeVideo() {
   console.log('startFakeVideo() ');
@@ -527,27 +527,27 @@ function makeOffer() {
   peerConnection = prepareNewConnection();
 
   let options = {};
-  if (localStream) {
-    if (isSendOnly()) {
-      console.log('-- try sendonly ---');
-      options = { offerToReceiveAudio: false, offerToReceiveVideo: false };
-    }
-  }
-  else {
+  // if (localStream) {
+  //   if (isSendOnly()) {
+  //     console.log('-- try sendonly ---');
+  //     options = { offerToReceiveAudio: false, offerToReceiveVideo: false };
+  //   }
+  // }
+  // else {
     // -- no localStream, so receive --
-    console.log('-- try recvonly ---');
+    // console.log('-- try recvonly ---');
 
-    options = { offerToReceiveAudio: true, offerToReceiveVideo: true };
+    // options = { offerToReceiveAudio: true, offerToReceiveVideo: true };
 
-    if ('addTransceiver' in peerConnection) {
-      console.log('-- use addTransceiver() for recvonly --');
-      peerConnection.addTransceiver('video').setDirection('recvonly');
-      peerConnection.addTransceiver('audio').setDirection('recvonly');
-      $('#status_disp').remove();
-      $('#status').prepend('<div id="status_disp" style="color: blue;">CONNECTED</div>');
-      $("#connect").prop("disabled", true);
-    }
-  }
+    // if ('addTransceiver' in peerConnection) {
+    //   console.log('-- use addTransceiver for recvonly --');
+    //   peerConnection.addTransceiver('video').setDirection('recvonly');
+    //   peerConnection.addTransceiver('audio').setDirection('recvonly');
+    //   $('#status_disp').remove();
+    //   $('#status').prepend('<div id="status_disp" style="color: blue;">CONNECTED</div>');
+    //   $("#connect").prop("disabled", true);
+    // }
+  // }
 
   peerConnection.createOffer(options)
   .then(function (sessionDescription) {
@@ -628,7 +628,7 @@ function setAnswer(sessionDescription) {
 }
 
 // start PeerConnection
-var connect = function () {
+function connect() {
   settings['conn'].send(JSON.stringify({command: "subscribe", meeting_id: meeting_id,username: username }));
 
   if (! peerConnection) {

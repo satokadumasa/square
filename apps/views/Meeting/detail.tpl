@@ -53,8 +53,8 @@
                   <button type="button" onclick="startVideo();">Start Media</button>
                   <button type="button" onclick="stopVideo();">Stop Media</button>
                   &nbsp;
-              -->
                   <input type="checkbox" id="send_only">send only</input>
+              -->
                   <button type="button" onclick="connect();" id="connect">Connect</button>
                   <button type="button" onclick="hangUp();">Hang Up</button>
                 </div>
