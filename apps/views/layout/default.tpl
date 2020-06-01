@@ -17,9 +17,6 @@
 var username = null;
 var userid = null;
 var passwd = null;
-var meeting_id = 0;
-var receiveSdp = null;
-var settings = {};
 </script>
 </head>
 <body>

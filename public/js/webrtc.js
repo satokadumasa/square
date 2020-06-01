@@ -1,3 +1,6 @@
+var receiveSdp = null;
+var settings = {};
+
 var micList = document.getElementById("mic_list");
 let localVideo = document.getElementById('local_video');
 var cameraList = document.getElementById("camera_list");
@@ -20,27 +23,14 @@ $(function(){
   username = $.cookie("username");
   passwd = $.cookie("password");
   $("#username").text(username);
+  console.log('Call checkSdp()');
+  checkSdp();
+  console.log('Call getDeviceList()');
   getDeviceList();
   // startVideo();
   $('#status').prepend('<div id="status_disp" style="color: read;">WAIT</div>');
   $("#connect").prop("disabled", true);
-  checkSdp();
 });
-
-/*****
- * デバイスリストのクリア
- */
-function clearDeviceList() {
-  while(micList.lastChild) {
-    micList.removeChild(micList.lastChild);
-  }
-  while(cameraList.lastChild) {
-    cameraList.removeChild(cameraList.lastChild);
-  }
-  while(speakerList.lastChild) {
-    speakerList.removeChild(speakerList.lastChild);
-  }
-}
 
 /*****
  * デバイスリストの更新
@@ -70,7 +60,7 @@ function addDevice(device) {
     var option = document.createElement('option');
     option.setAttribute('value', id);
     option.innerHTML = label + '(' + id + ')';
-    speakerList.appendChild(option);   
+    speakerList.appendChild(option);
   }
   else {
     console.error('UNKNOWN Device kind:' + device.kind);
@@ -81,12 +71,15 @@ function addDevice(device) {
  * 利用デバイスの取得
  */
 function getDeviceList() {
+  console.log('getDeviceList() START');
+  console.log('Call clearDeviceList()');
   clearDeviceList();
   navigator.mediaDevices.enumerateDevices()
   .then(function(devices) {
+    console.log('getDeviceList() get devices');
     devices.forEach(function(device) {
-    console.log(device.kind + ": " + device.label + " id = " + device.deviceId);
-    addDevice(device);
+      console.log(device.kind + ": " + device.label + " id = " + device.deviceId);
+      addDevice(device);
     });
   })
   .catch(function(err) {
@@ -95,9 +88,29 @@ function getDeviceList() {
 }
 
 /*****
+ * デバイスリストのクリア
+ */
+function clearDeviceList() {
+  console.log('clearDeviceList() START');
+  while(micList.lastChild) {
+    console.log('Call micList.removeChild()');
+    micList.removeChild(micList.lastChild);
+  }
+  while(cameraList.lastChild) {
+    console.log('Call cameraList.removeChild()');
+    cameraList.removeChild(cameraList.lastChild);
+  }
+  while(speakerList.lastChild) {
+    console.log('Call speakerList.removeChild()');
+    speakerList.removeChild(speakerList.lastChild);
+  }
+}
+
+/*****
  * 使用カメラの取得
  */
 function getSelectedVideo() {
+  console.log('getSelectedVideo() ');
   var id = cameraList.options[cameraList.selectedIndex].value;
   return id;
 }
@@ -106,6 +119,7 @@ function getSelectedVideo() {
  * 使用マイクの取得
  */
 function getSelectedAudio() {
+  console.log('getSelectedAudio() ');
   var id = micList.options[micList.selectedIndex].value;
   return id;
 }
@@ -114,6 +128,7 @@ function getSelectedAudio() {
  * 使用スピーカーの取得
  */
 function getSelectedSpeaker() {
+  console.log('getSelectedSpeaker() ');
   var id = speakerList.options[speakerList.selectedIndex].value;
   return id;
 }
@@ -122,6 +137,7 @@ function getSelectedSpeaker() {
  * スピーカーの設定
  */
 function setSpeaker() {
+  console.log('setSpeaker() START');
   var speakerId = getSelectedSpeaker();
   localVideo.volume = 0;
   localVideo.setSinkId(speakerId)
@@ -134,25 +150,30 @@ function setSpeaker() {
 }
 
 function isUseVideo() {
+  console.log('isUseVideo() ');
   let useVideo = document.getElementById('use_video').checked;
   return useVideo;
 }
 
 function isUseAudio() {
+  console.log('isUseAudio() ');
   let useAudio = document.getElementById('use_audio').checked;
   return useAudio;
 }
 
 function isSendOnly() {
+  console.log('isSendOnly() ');
   let sendOnly = document.getElementById('send_only').checked;
   return sendOnly;
 }
 
 function startFakeVideo() {
+  console.log('startFakeVideo() ');
   var constraints = {video: true, fake: true, audio: false};
   navigator.mediaDevices.getUserMedia(
     constraints
   ).then(function(stream) {
+    console.log('startFakeVideo() Success');
     localStream = stream;
     logStream('selectedVideo', stream);
     localVideo.srcObject = stream;
@@ -162,6 +183,7 @@ function startFakeVideo() {
 }
 
 function startSelectedVideoAudio() {
+  console.log('startSelectedVideoAudio() START');
   var audioId = getSelectedAudio();
   var deviceId = getSelectedVideo();
   console.log('selected video device id=' + deviceId + ' ,  audio=' + audioId);
@@ -183,6 +205,7 @@ function startSelectedVideoAudio() {
   navigator.mediaDevices.getUserMedia(
    constraints
   ).then(function(stream) {
+    console.log('startSelectedVideoAudio() Success');
     localStream = stream;
     logStream('selectedVideo', stream);
     localVideo.srcObject = stream;
@@ -190,7 +213,11 @@ function startSelectedVideoAudio() {
     $('#status_disp').remove();
     $('#status').prepend('<div id="status_disp" style="color: grean;">READY</div>');
     $("#connect").prop("disabled", false);
-
+    if(receiveSdp == null || receiveSdp == ''){
+      connect();
+    } else {
+      onSdpText();
+    }
   }).catch(function(err){
     console.error('getUserMedia Err:', err);
   });
@@ -198,6 +225,7 @@ function startSelectedVideoAudio() {
 
 // start local video
 function startVideo() {
+  console.log('startVideo() START');
   let useVideo = isUseVideo();
   let useAudio = isUseAudio();
   if ( (! useVideo) && (! useAudio) ) {
@@ -207,6 +235,7 @@ function startVideo() {
 
   getDeviceStream({video: useVideo, audio: useAudio}) // audio: false
   .then(function (stream) { // success
+    console.log('getDeviceStream() Success');
     logStream('localStream', stream);
     localStream = stream;
     playVideo(localVideo, stream);
@@ -221,6 +250,7 @@ function startVideo() {
 
 // stop local video
 function stopVideo() {
+  console.log('stopVideo() START');
   pauseVideo(localVideo);
   stopLocalStream(localStream);
   $('#status_disp').remove();
@@ -229,6 +259,7 @@ function stopVideo() {
 }
 
 function stopLocalStream(stream) {
+  console.log('stopLocalStream() START');
   let tracks = stream.getTracks();
   if (! tracks) {
     console.warn('NO tracks');
@@ -245,6 +276,7 @@ function stopLocalStream(stream) {
  ・既に入室者がいた場合に、入室者のオファーを取得する。
  */
 function checkSdp() {
+  console.log('checkSdp() START');
   var data = {
     "meeting_id": meeting_id
   };
@@ -255,10 +287,14 @@ function checkSdp() {
     dataType:"json",
     timespan:1000
   }).done(function(data,status,jqXHR) {
+    console.log('checkSdp() Success');
     if(data['status'] == true) {
       receiveSdp = data['sdp'];
       textToReceiveSdp.value = receiveSdp;
       $("#connect").prop("disabled", true);
+      // if(receiveSdp) {
+      //   onSdpText();
+      // }
     }
   }).fail(function(jqXHR, status, errorThrown ) {
   }).always(function(){
@@ -266,10 +302,12 @@ function checkSdp() {
 }
 
 function logStream(msg, stream) {
+  console.log('logStream() START');
   console.log(msg + ': id=' + stream.id);
 
   var videoTracks = stream.getVideoTracks();
   if (videoTracks) {
+    console.log('logStream() exist videoTracks');
     console.log('videoTracks.length=' + videoTracks.length);
     for (var i = 0; i < videoTracks.length; i++) {
       var track = videoTracks[i];
@@ -279,6 +317,7 @@ function logStream(msg, stream) {
 
   var audioTracks = stream.getAudioTracks();
   if (audioTracks) {
+    console.log('logStream() exist audioTracks');
     console.log('audioTracks.length=' + audioTracks.length);
     for (var i = 0; i < audioTracks.length; i++) {
       var track = audioTracks[i];
@@ -288,6 +327,7 @@ function logStream(msg, stream) {
 }
 
 function getDeviceStream(option) {
+  console.log('getDeviceStream() ');
   if ('getUserMedia' in navigator.mediaDevices) {
     console.log('navigator.mediaDevices.getUserMadia');
     return navigator.mediaDevices.getUserMedia(option);
@@ -304,8 +344,11 @@ function getDeviceStream(option) {
 }
 
 function playVideo(element, stream) {
+  console.log('playVideo() ');
   if ('srcObject' in element) {
+    console.log('playVideo() exist srcObject');
     if (! element.srcObject) {
+      console.log('playVideo() srcObject is null. Create srcObject');
       element.srcObject = stream;
     }
     else {
@@ -320,11 +363,14 @@ function playVideo(element, stream) {
 }
 
 function pauseVideo(element) {
+  console.log('pauseVideo() ');
   element.pause();
   if ('srcObject' in element) {
+    console.log('pauseVideo() set null.(1)');
     element.srcObject = null;
   }
   else {
+    console.log('pauseVideo() set null.(2)');
     if (element.src && (element.src !== '') ) {
       window.URL.revokeObjectURL(element.src);
     }
@@ -334,8 +380,9 @@ function pauseVideo(element) {
 
 // ----- hand signaling ----
 function onSdpText() {
+  console.log('onSdpText() ');
   settings['conn'].send(JSON.stringify({command: "subscribe", meeting_id: meeting_id,username: username }));
-  receiveSdp = (receiveSdp != null) ? receiveSdp : textToReceiveSdp.value;
+  receiveSdp = (receiveSdp != null && receiveSdp != '') ? receiveSdp : textToReceiveSdp.value;
   receiveSdp = _trimTailDoubleLF(receiveSdp)
   console.log("onSdpText() text:" + receiveSdp);
   if (peerConnection) {
@@ -393,6 +440,7 @@ function _trimTailDoubleLF(str) {
 
 // ---------------------- connection handling -----------------------
 function prepareNewConnection() {
+  console.log('prepareNewConnection() ');
   var peer = null;
   let pc_config = {
     "iceServers": [
@@ -438,6 +486,7 @@ function prepareNewConnection() {
 
   // --- on get local ICE candidate
   peer.onicecandidate = function (evt) {
+    console.log('peer.onicecandidate() ');
     if (evt.candidate) {
       console.log(evt.candidate);
       // Trickle ICE の場合は、ICE candidateを相手に送る
@@ -474,6 +523,7 @@ function prepareNewConnection() {
 }
 
 function makeOffer() {
+  console.log('makeOffer() ');
   peerConnection = prepareNewConnection();
 
   let options = {};
@@ -515,6 +565,7 @@ function makeOffer() {
 }
 
 function setOffer(sessionDescription) {
+  console.log('setOffer() ');
   if (peerConnection) {
     console.error('peerConnection alreay exist!');
   }
@@ -562,6 +613,7 @@ function makeAnswer() {
 }
 
 function setAnswer(sessionDescription) {
+  console.log('setAnswer() ');
   if (! peerConnection) {
     console.error('peerConnection NOT exist!');
     return;
@@ -576,7 +628,7 @@ function setAnswer(sessionDescription) {
 }
 
 // start PeerConnection
-function connect() {
+var connect = function () {
   settings['conn'].send(JSON.stringify({command: "subscribe", meeting_id: meeting_id,username: username }));
 
   if (! peerConnection) {
@@ -590,6 +642,7 @@ function connect() {
 
 // close PeerConnection
 function hangUp() {
+  console.log('hangUp() ');
   if (peerConnection) {
     console.log('Hang up.');
     peerConnection.close();
@@ -620,22 +673,21 @@ function hangUp() {
 }
 
 function sleep(waitSec, callbackFunc) {
- 
-    // 経過時間（秒）
-    var spanedSec = 0;
- 
-    // 1秒間隔で無名関数を実行
-    var id = setInterval(function () {
-        spanedSec++;
-        // 経過時間 >= 待機時間の場合、待機終了。
-        if (spanedSec >= waitSec) {
-            // タイマー停止
-            clearInterval(id);
-            // 完了時、コールバック関数を実行
-            if (callbackFunc) callbackFunc();
-        }
-    }, 1000);
- 
+  console.log('sleep() ');
+  // 経過時間（秒）
+  var spanedSec = 0;
+
+  // 1秒間隔で無名関数を実行
+  var id = setInterval(function () {
+      spanedSec++;
+      // 経過時間 >= 待機時間の場合、待機終了。
+      if (spanedSec >= waitSec) {
+          // タイマー停止
+          clearInterval(id);
+          // 完了時、コールバック関数を実行
+          if (callbackFunc) callbackFunc();
+      }
+  }, 1000);
 }
 
 function set_user_info(){

@@ -93,6 +93,7 @@
                 </div>
               </div>
               <script>
+              var meeting_id = 0;
               meeting_id = <!----value:Meeting:id---->;
               </script>
               <script src="/js/chat.js"></script>
