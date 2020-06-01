@@ -62,6 +62,7 @@ function addDevice(device) {
     option.innerHTML = label + '(' + id + ')';
     speakerList.appendChild(option);
   }
+
   else {
     console.error('UNKNOWN Device kind:' + device.kind);
   }
@@ -81,6 +82,7 @@ function getDeviceList() {
       console.log(device.kind + ": " + device.label + " id = " + device.deviceId);
       addDevice(device);
     });
+    $("#start_video_button").prop("disabled", false);
   })
   .catch(function(err) {
     console.error('enumerateDevide ERROR:', err);
@@ -177,6 +179,7 @@ function startFakeVideo() {
     localStream = stream;
     logStream('selectedVideo', stream);
     localVideo.srcObject = stream;
+    $("#start_video_button").prop("disabled", true);
   }).catch(function(err){
     console.error('getUserMedia Err:', err);
   });
@@ -190,15 +193,11 @@ function startSelectedVideoAudio() {
   var constraints = {
     audio: {
       deviceId: audioId
+
     },
     video: { 
       deviceId: deviceId
     },
-    // echoCancellation: true,
-    // echoCancellationType: "system",
-    // sampleRate: 48000,
-    // sampleSize: 16,
-    // volume: 0.5411764705882353,
   };
   console.log('mediaDevice.getMedia() constraints:', constraints);
 
@@ -212,12 +211,14 @@ function startSelectedVideoAudio() {
     // playVideo(localVideo, stream);
     $('#status_disp').remove();
     $('#status').prepend('<div id="status_disp" style="color: grean;">READY</div>');
-    $("#connect").prop("disabled", false);
+    // $("#connect").prop("disabled", false);
+
     if(receiveSdp == null || receiveSdp == ''){
       connect();
     } else {
       onSdpText();
     }
+    $("#start_video_button").prop("disabled", true);
   }).catch(function(err){
     console.error('getUserMedia Err:', err);
   });
@@ -256,6 +257,7 @@ function stopVideo() {
   $('#status_disp').remove();
   $('#status').prepend('<div id="status_disp" style="color: read;">WAIT</div>');
   $("#connect").prop("disabled", true);
+  $("#stop_button").prop("disabled", true);
 }
 
 function stopLocalStream(stream) {
@@ -268,6 +270,8 @@ function stopLocalStream(stream) {
 
   for (let track of tracks) {
     track.stop();
+    $("#start_video_button").prop("disabled", false);
+    $("#stop_button").prop("disabled", true);
   }
 }
 
@@ -292,9 +296,6 @@ function checkSdp() {
       receiveSdp = data['sdp'];
       textToReceiveSdp.value = receiveSdp;
       $("#connect").prop("disabled", true);
-      // if(receiveSdp) {
-      //   onSdpText();
-      // }
     }
   }).fail(function(jqXHR, status, errorThrown ) {
   }).always(function(){
@@ -401,7 +402,7 @@ function onSdpText() {
     });
     setOffer(offer);
   }
-  // textToReceiveSdp.value ='';
+  $("#hangUp").prop("disabled", false);
 }
 
 function sendSdp(sessionDescription) {
@@ -420,8 +421,6 @@ function sendSdp(sessionDescription) {
     dataType:"json",
     timespan:1000
   }).done(function(revive_data,status,jqXHR) {
-    // var send_data = "username=" + username + ":meeting_id=" + meeting_id;
-    // settings['conn'].send(send_data);
     settings['conn'].send(JSON.stringify({command: "message", meeting_id: meeting_id, username: username }));
   }).fail(function(jqXHR, status, errorThrown ) {
   }).always(function(){
@@ -527,27 +526,8 @@ function makeOffer() {
   peerConnection = prepareNewConnection();
 
   let options = {};
-  // if (localStream) {
-  //   if (isSendOnly()) {
-  //     console.log('-- try sendonly ---');
-  //     options = { offerToReceiveAudio: false, offerToReceiveVideo: false };
-  //   }
-  // }
-  // else {
-    // -- no localStream, so receive --
-    // console.log('-- try recvonly ---');
 
-    // options = { offerToReceiveAudio: true, offerToReceiveVideo: true };
-
-    // if ('addTransceiver' in peerConnection) {
-    //   console.log('-- use addTransceiver for recvonly --');
-    //   peerConnection.addTransceiver('video').setDirection('recvonly');
-    //   peerConnection.addTransceiver('audio').setDirection('recvonly');
-    //   $('#status_disp').remove();
-    //   $('#status').prepend('<div id="status_disp" style="color: blue;">CONNECTED</div>');
-    //   $("#connect").prop("disabled", true);
-    // }
-  // }
+  options = { offerToReceiveAudio: true, offerToReceiveVideo: true };
 
   peerConnection.createOffer(options)
   .then(function (sessionDescription) {
@@ -555,7 +535,7 @@ function makeOffer() {
     return peerConnection.setLocalDescription(sessionDescription);
   }).then(function() {
     console.log('setLocalDescription() succsess in promise');
-
+    $("#hangUp").prop("disabled", false);
     // -- Trickle ICE の場合は、初期SDPを相手に送る --
     // -- Vanilla ICE の場合には、まだSDPは送らない --
     //sendSdp(peerConnection.localDescription);
@@ -588,8 +568,6 @@ function makeAnswer() {
 
   let options = {};
   if (! localStream) {
-    //options = { offerToReceiveAudio: true, offerToReceiveVideo: true }
-
     if ('addTransceiver' in peerConnection) {
       console.log('-- use addTransceiver() for recvonly --');
       peerConnection.addTransceiver('video').setDirection('recvonly');
@@ -663,6 +641,8 @@ function hangUp() {
       $('#status_disp').remove();
       $('#status').prepend('<div id="status_disp" style="color: green;">READY</div>');
       $("#connect").prop("disabled", false);
+      $("#start_video_button").prop("disabled", false);
+      $("#stop_button").prop("disabled", false);
     }).fail(function(jqXHR, status, errorThrown ) {
     }).always(function(){
     });

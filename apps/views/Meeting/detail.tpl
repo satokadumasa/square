@@ -37,26 +37,22 @@
               </div>
               <div class='row'>
                 <div class='col-sm-12 col-md-12 col-lg-12 col-xl-12'>
-                  <button id="start_video_button" onclick="startSelectedVideoAudio()">Start Selected Video/Audio</button>
-                  <button id="stop_button" onclick="stopVideo()">StopVideo</button>
-                  <!--
-                  <button id="speaker_button" onclick="setSpeaker()">SetSpeaker</button>
-                  <button id="speaker_button" onclick="startFakeVideo()">start Fake video</button>
-                  -->
+                  <button onclick="startSelectedVideoAudio()" id="start_video_button" disabled>
+                    Start Selected Video/Audio
+                  </button>
+                  <button onclick="stopVideo()" id="stop_button" disabled>
+                    StopVideo
+                  </button>
                 </div>
               </div>
               <div class='row'>
                 <div class='col-sm-12 col-md-12 col-lg-12 col-xl-12'>
-              <!--
-                  <input type="checkbox" id="use_video" checked="1">use Video</input>
-                  <input type="checkbox" id="use_audio" checked="1">use Audio</input>
-                  <button type="button" onclick="startVideo();">Start Media</button>
-                  <button type="button" onclick="stopVideo();">Stop Media</button>
-                  &nbsp;
-                  <input type="checkbox" id="send_only">send only</input>
-              -->
-                  <button type="button" onclick="connect();" id="connect">Connect</button>
-                  <button type="button" onclick="hangUp();">Hang Up</button>
+                  <button type="button" onclick="connect();" id="connect" disabled>
+                    Connect
+                  </button>
+                  <button type="button" onclick="hangUp();" id="hangUp" disabled>
+                    Hang Up
+                  </button>
                 </div>
               </div>
               <div class='row'>
@@ -66,19 +62,9 @@
                 <div class='col-sm-12 col-md-12 col-lg-6 col-xl-6'>
                   <video id="remote_video" autoplay="1" style="width: 400px; height: 300px; border: 1px solid black;"></video>
                 </div>
-                <div class='col-sm-12 col-md-12 col-lg-12 col-xl-12'>
-                  <p>SDP to send:&nbsp;
-                    <button type="button" onclick="copySdp();">copy local SDP</button><br />
-                    <textarea id="text_for_send_sdp" rows="5" cols="60" readonly="readonly"></textarea>
-                  </p>
-                </div>
-                <div class='col-sm-12 col-md-12 col-lg-12 col-xl-12'>
-                  <p>SDP to receive:&nbsp;
-                    <button type="button" onclick="onSdpText();">Receive remote SDP</button><br />
-                    <textarea id="text_for_receive_sdp" rows="5" cols="60"></textarea>
-                  </p>
-                </div>
               </div>
+              <input type="hidden" name="text_for_send_sdp" id="text_for_send_sdp">
+              <input type="hidden" name="text_for_receive_sdp" id="text_for_receive_sdp">
 
               <hr>
               <div class="row">

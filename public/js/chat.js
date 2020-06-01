@@ -41,17 +41,17 @@ $(function() {
 
     onMessage : function (event) {
       if (event && event.data) {
-        // if($.isArray(event.data)) {
-        //   if($('#text_for_receive_sdp').length) {
-        //     if(event.data.sdp) {
-        //       $('#text_for_receive_sdp').val(event.data.sdp);
-        //     }
-        //   }
-        // } else {
-        //   $(this).chat('drawText',event.data,'left');
-        // }
         if(event.data) {
-          $('#text_for_receive_sdp').val(event.data);
+          if(event.data == 'CONNECTED') {
+            var inner = $('<div class="left"></div>').text(event.data);
+            var box = $('<div class="box"></div>').html(inner);
+          } else {
+            $('#text_for_receive_sdp').val(event.data);
+            receiveSdp = event.data;
+            if(localVideo){
+              onSdpText();
+            }
+          }
         }
       }
     },
@@ -63,7 +63,7 @@ $(function() {
     onClose : function(event) {
       $(this).chat('drawText','サーバと切断','left');
       settings['conn'] = null;
-      setTimeout(methods['connect'], 7600000);
+      setTimeout(methods['connect'], 3000);
     },
     drawText : function (message, align='left') {
       if($('.box').length){
