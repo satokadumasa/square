@@ -2,7 +2,7 @@ $(function() {
   username = $.cookie("username");
   passwd = $.cookie("password");
 
-  var methods = {
+  let methods = {
     init : function( options ) {
       settings = $.extend({
         'uri'   : 'wss://september-rain.com/cable',
@@ -16,7 +16,7 @@ $(function() {
 
     checkEvent : function ( event ) {
       if (event && event.which == 13) {
-        var message = $(settings['message']).val();
+        let message = $(settings['message']).val();
         if (message && settings['conn']) {
           settings['conn'].send(message + '');
           $(this).chat('drawText',message,'right');
@@ -43,8 +43,8 @@ $(function() {
       if (event && event.data) {
         if(event.data) {
           if(event.data == 'CONNECTED') {
-            var inner = $('<div class="left"></div>').text(event.data);
-            var box = $('<div class="box"></div>').html(inner);
+            let inner = $('<div class="left"></div>').text(event.data);
+            let box = $('<div class="box"></div>').html(inner);
           } else {
             $('#text_for_receive_sdp').val(event.data);
             receiveSdp = event.data;
@@ -69,8 +69,8 @@ $(function() {
       if($('.box').length){
         $('.box').remove();
       }
-      var inner = $('<div class="left"></div>').text(message);
-      var box = $('<div class="box"></div>').html(inner);
+      let inner = $('<div class="left"></div>').text(message);
+      let box = $('<div class="box"></div>').html(inner);
       $('#chat').prepend(box);
     },
   }; // end of methods

@@ -57,7 +57,7 @@
               </div>
               <div class='row'>
                 <div class='col-sm-12 col-md-12 col-lg-6 col-xl-6'>
-                  <video id="local_video" autoplay="1" style="width: 400px; height: 300px; border: 1px solid black;"></video>
+                  <video id="local_video" muted="muted" autoplay="1" style="width: 400px; height: 300px; border: 1px solid black;"></video>
                 </div>
                 <div class='col-sm-12 col-md-12 col-lg-6 col-xl-6'>
                   <video id="remote_video" autoplay="1" style="width: 400px; height: 300px; border: 1px solid black;"></video>
@@ -79,8 +79,8 @@
                 </div>
               </div>
               <script>
-              var meeting_id = 0;
+              let meeting_id = 0;
               meeting_id = <!----value:Meeting:id---->;
               </script>
-              <script src="/js/chat.js"></script>
+              <script src="/js/chat.js" type="text/javascript"></script>
               <script src="/js/webrtc.js" type="text/javascript"></script>

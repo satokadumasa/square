@@ -1,10 +1,10 @@
-var receiveSdp = null;
-var settings = {};
+let receiveSdp = null;
+let settings = {};
 
-var micList = document.getElementById("mic_list");
+let micList = document.getElementById("mic_list");
 let localVideo = document.getElementById('local_video');
-var cameraList = document.getElementById("camera_list");
-var speakerList = document.getElementById("speaker_list");
+let cameraList = document.getElementById("camera_list");
+let speakerList = document.getElementById("speaker_list");
 let remoteVideo = document.getElementById('remote_video');
 let localStream = null;
 let peerConnection = null;
@@ -37,27 +37,27 @@ $(function(){
  */
 function addDevice(device) {
   if (device.kind === 'audioinput') {
-    var id = device.deviceId;
-    var label = device.label || 'microphone'; // label is available for https 
-    var option = document.createElement('option');
+    let id = device.deviceId;
+    let label = device.label || 'microphone'; // label is available for https 
+    let option = document.createElement('option');
     option.setAttribute('value', id);
     option.innerHTML = label + '(' + id + ')';;
     micList.appendChild(option);
   }
   else if (device.kind === 'videoinput') {
-    var id = device.deviceId;
-    var label = device.label || 'camera'; // label is available for https 
+    let id = device.deviceId;
+    let label = device.label || 'camera'; // label is available for https 
 
-    var option = document.createElement('option');
+    let option = document.createElement('option');
     option.setAttribute('value', id);
     option.innerHTML = label + '(' + id + ')';
     cameraList.appendChild(option);
   }
   else if (device.kind === 'audiooutput') {
-    var id = device.deviceId;
-    var label = device.label || 'speaker'; // label is available for https 
+    let id = device.deviceId;
+    let label = device.label || 'speaker'; // label is available for https 
 
-    var option = document.createElement('option');
+    let option = document.createElement('option');
     option.setAttribute('value', id);
     option.innerHTML = label + '(' + id + ')';
     speakerList.appendChild(option);
@@ -113,7 +113,7 @@ function clearDeviceList() {
  */
 function getSelectedVideo() {
   console.log('getSelectedVideo() ');
-  var id = cameraList.options[cameraList.selectedIndex].value;
+  let id = cameraList.options[cameraList.selectedIndex].value;
   return id;
 }
 
@@ -122,7 +122,7 @@ function getSelectedVideo() {
  */
 function getSelectedAudio() {
   console.log('getSelectedAudio() ');
-  var id = micList.options[micList.selectedIndex].value;
+  let id = micList.options[micList.selectedIndex].value;
   return id;
 }
 
@@ -131,7 +131,7 @@ function getSelectedAudio() {
  */
 function getSelectedSpeaker() {
   console.log('getSelectedSpeaker() ');
-  var id = speakerList.options[speakerList.selectedIndex].value;
+  let id = speakerList.options[speakerList.selectedIndex].value;
   return id;
 }
 
@@ -140,7 +140,7 @@ function getSelectedSpeaker() {
  */
 function setSpeaker() {
   console.log('setSpeaker() START');
-  var speakerId = getSelectedSpeaker();
+  let speakerId = getSelectedSpeaker();
   localVideo.volume = 0;
   localVideo.setSinkId(speakerId)
   .then(function() {
@@ -151,49 +151,26 @@ function setSpeaker() {
   });
 }
 
-function isUseVideo() {
-  console.log('isUseVideo() ');
-  let useVideo = document.getElementById('use_video').checked;
-  return useVideo;
-}
-
-function isUseAudio() {
-  console.log('isUseAudio() ');
-  let useAudio = document.getElementById('use_audio').checked;
-  return useAudio;
-}
-
-// function isSendOnly() {
-//   console.log('isSendOnly() ');
-//   let sendOnly = document.getElementById('send_only').checked;
-//   return sendOnly;
+// function isUseVideo() {
+//   console.log('isUseVideo() ');
+//   let useVideo = document.getElementById('use_video').checked;
+//   return useVideo;
 // }
 
-function startFakeVideo() {
-  console.log('startFakeVideo() ');
-  var constraints = {video: true, fake: true, audio: false};
-  navigator.mediaDevices.getUserMedia(
-    constraints
-  ).then(function(stream) {
-    console.log('startFakeVideo() Success');
-    localStream = stream;
-    logStream('selectedVideo', stream);
-    localVideo.srcObject = stream;
-    $("#start_video_button").prop("disabled", true);
-  }).catch(function(err){
-    console.error('getUserMedia Err:', err);
-  });
-}
+// function isUseAudio() {
+//   console.log('isUseAudio() ');
+//   let useAudio = document.getElementById('use_audio').checked;
+//   return useAudio;
+// }
 
 function startSelectedVideoAudio() {
   console.log('startSelectedVideoAudio() START');
-  var audioId = getSelectedAudio();
-  var deviceId = getSelectedVideo();
+  let audioId = getSelectedAudio();
+  let deviceId = getSelectedVideo();
   console.log('selected video device id=' + deviceId + ' ,  audio=' + audioId);
-  var constraints = {
+  let constraints = {
     audio: {
       deviceId: audioId
-
     },
     video: { 
       deviceId: deviceId
@@ -227,8 +204,10 @@ function startSelectedVideoAudio() {
 // start local video
 function startVideo() {
   console.log('startVideo() START');
-  let useVideo = isUseVideo();
-  let useAudio = isUseAudio();
+  // let useVideo = isUseVideo();
+  // let useAudio = isUseAudio();
+  let useVideo = true;
+  let useAudio = true;
   if ( (! useVideo) && (! useAudio) ) {
     console.warn('NO media to capture');
     return;
@@ -281,7 +260,7 @@ function stopLocalStream(stream) {
  */
 function checkSdp() {
   console.log('checkSdp() START');
-  var data = {
+  let data = {
     "meeting_id": meeting_id
   };
   $.ajax({
@@ -306,22 +285,22 @@ function logStream(msg, stream) {
   console.log('logStream() START');
   console.log(msg + ': id=' + stream.id);
 
-  var videoTracks = stream.getVideoTracks();
+  let videoTracks = stream.getVideoTracks();
   if (videoTracks) {
     console.log('logStream() exist videoTracks');
     console.log('videoTracks.length=' + videoTracks.length);
-    for (var i = 0; i < videoTracks.length; i++) {
-      var track = videoTracks[i];
+    for (let i = 0; i < videoTracks.length; i++) {
+      let track = videoTracks[i];
       console.log('track.id=' + track.id);
     }
   }
 
-  var audioTracks = stream.getAudioTracks();
+  let audioTracks = stream.getAudioTracks();
   if (audioTracks) {
     console.log('logStream() exist audioTracks');
     console.log('audioTracks.length=' + audioTracks.length);
-    for (var i = 0; i < audioTracks.length; i++) {
-      var track = audioTracks[i];
+    for (let i = 0; i < audioTracks.length; i++) {
+      let track = audioTracks[i];
       console.log('track.id=' + track.id);
     }
   }
@@ -383,9 +362,10 @@ function pauseVideo(element) {
 function onSdpText() {
   console.log('onSdpText() ');
   settings['conn'].send(JSON.stringify({command: "subscribe", meeting_id: meeting_id,username: username }));
-  receiveSdp = (receiveSdp != null && receiveSdp != '') ? receiveSdp : textToReceiveSdp.value;
+  // receiveSdp = (receiveSdp != null && receiveSdp != '') ? receiveSdp : textToReceiveSdp.value;
   receiveSdp = _trimTailDoubleLF(receiveSdp)
   console.log("onSdpText() text:" + receiveSdp);
+
   if (peerConnection) {
     console.log('Received answer text...');
     let answer = new RTCSessionDescription({
@@ -408,9 +388,9 @@ function onSdpText() {
 function sendSdp(sessionDescription) {
   console.log('---sending sdp ---');
   textForSendSdp.value = sessionDescription.sdp;
-  var sdp = sessionDescription.sdp;
+  let sdp = sessionDescription.sdp;
 
-  var data = {
+  let data = {
     "meeting_id": meeting_id,
     "sdp": sdp
   };
@@ -440,7 +420,7 @@ function _trimTailDoubleLF(str) {
 // ---------------------- connection handling -----------------------
 function prepareNewConnection() {
   console.log('prepareNewConnection() ');
-  var peer = null;
+  let peer = null;
   let pc_config = {
     "iceServers": [
       {
@@ -521,6 +501,9 @@ function prepareNewConnection() {
   return peer;
 }
 
+/**
+ *  Offerを作成する
+ */
 function makeOffer() {
   console.log('makeOffer() ');
   peerConnection = prepareNewConnection();
@@ -544,6 +527,9 @@ function makeOffer() {
   });
 }
 
+/**
+ *　受けたOfferに従いリモートの情報をpeerConnectionにセットする  
+ */
 function setOffer(sessionDescription) {
   console.log('setOffer() ');
   if (peerConnection) {
@@ -559,6 +545,9 @@ function setOffer(sessionDescription) {
   });
 }
 
+/**
+ *  Answeを作成する。
+ */
 function makeAnswer() {
   console.log('sending Answer. Creating remote session description...' );
   if (! peerConnection) {
@@ -590,6 +579,9 @@ function makeAnswer() {
   });
 }
 
+/**
+ *  Offerに対するAnserをpeerConnectionにセットする。
+ */
 function setAnswer(sessionDescription) {
   console.log('setAnswer() ');
   if (! peerConnection) {
@@ -627,7 +619,7 @@ function hangUp() {
     peerConnection = null;
     pauseVideo(remoteVideo);
 
-    var data = {
+    let data = {
       "meeting_id": meeting_id,
     };
 
@@ -655,10 +647,10 @@ function hangUp() {
 function sleep(waitSec, callbackFunc) {
   console.log('sleep() ');
   // 経過時間（秒）
-  var spanedSec = 0;
+  let spanedSec = 0;
 
   // 1秒間隔で無名関数を実行
-  var id = setInterval(function () {
+  let id = setInterval(function () {
       spanedSec++;
       // 経過時間 >= 待機時間の場合、待機終了。
       if (spanedSec >= waitSec) {
