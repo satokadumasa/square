@@ -1,3 +1,7 @@
+username = $.cookie("username");
+passwd = $.cookie("password");
+
+let sendSdp = null;
 let receiveSdp = null;
 let settings = {};
 
@@ -5,13 +9,29 @@ let micList = document.getElementById("mic_list");
 let localVideo = document.getElementById('local_video');
 let cameraList = document.getElementById("camera_list");
 let speakerList = document.getElementById("speaker_list");
-let remoteVideo = document.getElementById('remote_video');
+// let remoteVideo = document.getElementById('remote_video');
 let localStream = null;
 let peerConnection = null;
 
 let textForSendSdp = document.getElementById('text_for_send_sdp');
 let textToReceiveSdp = document.getElementById('text_for_receive_sdp');
-
+let pc_config = {
+  "iceServers": [
+    {
+      "url":"stun:september-rain.com:3478"
+    },
+    {
+      "url": "turn:september-rain.com:3478?transport=udp",
+      "credential": passwd,
+      "username": username
+    },
+    {
+      "url": "turn:september-rain.com:3478?transport=tcp",
+      "credential": passwd,
+      "username": username
+    },
+  ]
+};
 // --- prefix -----
 navigator.getUserMedia  = navigator.getUserMedia    || navigator.webkitGetUserMedia ||
                           navigator.mozGetUserMedia || navigator.msGetUserMedia;
@@ -20,16 +40,107 @@ RTCSessionDescription = window.RTCSessionDescription || window.webkitRTCSessionD
 
 // ---------------------- media handling -----------------------
 $(function(){
-  username = $.cookie("username");
-  passwd = $.cookie("password");
   $("#username").text(username);
   console.log('Call checkSdp()');
   checkSdp();
   console.log('Call getDeviceList()');
   getDeviceList();
-  // startVideo();
+  // startLocalVideo();
   $('#status').prepend('<div id="status_disp" style="color: read;">WAIT</div>');
   $("#connect").prop("disabled", true);
+  // --- Messaging ---
+
+  let methods = {
+    init : function( options ) {
+      settings = $.extend({
+        'uri'   : 'wss://september-rain.com/cable',
+        'conn'  : null,
+        'message' : '#message',
+        'display' : '#display'
+      }, options);
+      $(settings['message']).keypress( methods['checkEvent'] );
+      $(this).chat('connect');
+    },
+
+    checkEvent : function ( event ) {
+      if (event && event.which == 13) {
+        let message = $(settings['message']).val();
+        if (message && settings['conn']) {
+          settings['conn'].send(message + '');
+          $(this).chat('drawText',message,'right');
+          $(settings['message']).val('');
+        }
+      }
+    },
+
+    connect : function () {
+      if (settings['conn'] == null) {
+        settings['conn'] = new WebSocket(settings['uri']);
+        settings['conn'].onopen = methods['onOpen'];
+        settings['conn'].onmessage = methods['onMessage'];
+        settings['conn'].onclose = methods['onClose'];
+        settings['conn'].onerror = methods['onError'];
+      }
+    },
+
+    onOpen : function ( event ) {
+      $(this).chat('drawText','サーバに接続','left');
+    },
+
+    onMessage : function (event) {
+      if (event && event.data) {
+        if(event.data) {
+          if(event.data == 'CONNECTED') {
+            let inner = $('<div class="left"></div>').text(event.data);
+            let box = $('<div class="box"></div>').html(inner);
+          } else {
+            $('#text_for_receive_sdp').val(event.data);
+            recv_data = JSON.parse(event.data);
+            receiveSdp = recv_data['sdp'];
+            if(localVideo){
+              let remoteVideo = addRemoteVideoTag(recv_data['username'])
+              onSdpText(remoteVideo);
+              deleteSdp(recv_data['username']);
+            }
+          }
+        }
+      }
+    },
+
+    onError : function(event) {
+      $(this).chat('drawText','エラー発生!','left');
+    },
+
+    onClose : function(event) {
+      $(this).chat('drawText','サーバと切断','left');
+      settings['conn'] = null;
+      setTimeout(methods['connect'], 3000);
+    },
+    drawText : function (message, align='left') {
+      if($('.box').length){
+        $('.box').remove();
+      }
+      let inner = $('<div class="left"></div>').text(message);
+      let box = $('<div class="box"></div>').html(inner);
+      $('#chat').prepend(box);
+    },
+  }; // end of methods
+
+  $.fn.chat = function( method ) {
+    if ( methods[method] ) {
+      return methods[ method ].apply( this, Array.prototype.slice.call( arguments, 1 ));
+    } else if ( typeof method === 'object' || ! method ) {
+      return methods.init.apply( this, arguments );
+    } else {
+      $.error( 'Method ' +  method + ' does not exist' );
+    }
+  } // end of function
+
+  $(this).chat({
+    'uri':'wss://september-rain.com/cable',
+    'message' : '#message',
+    'display' : '#chat'
+  });
 });
 
 /*****
@@ -151,18 +262,6 @@ function setSpeaker() {
   });
 }
 
-// function isUseVideo() {
-//   console.log('isUseVideo() ');
-//   let useVideo = document.getElementById('use_video').checked;
-//   return useVideo;
-// }
-
-// function isUseAudio() {
-//   console.log('isUseAudio() ');
-//   let useAudio = document.getElementById('use_audio').checked;
-//   return useAudio;
-// }
-
 function startSelectedVideoAudio() {
   console.log('startSelectedVideoAudio() START');
   let audioId = getSelectedAudio();
@@ -202,31 +301,30 @@ function startSelectedVideoAudio() {
 }
 
 // start local video
-function startVideo() {
-  console.log('startVideo() START');
-  // let useVideo = isUseVideo();
-  // let useAudio = isUseAudio();
-  let useVideo = true;
-  let useAudio = true;
-  if ( (! useVideo) && (! useAudio) ) {
-    console.warn('NO media to capture');
-    return;
-  }
+// function startLocalVideo() {
+//   console.log('startLocalVideo() START');
+//   let useVideo = true;
+//   let useAudio = true;
 
-  getDeviceStream({video: useVideo, audio: useAudio}) // audio: false
-  .then(function (stream) { // success
-    console.log('getDeviceStream() Success');
-    logStream('localStream', stream);
-    localStream = stream;
-    playVideo(localVideo, stream);
-    $('#status_disp').remove();
-    $('#status').prepend('<div id="status_disp" style="color: grean;">READY</div>');
-    $("#connect").prop("disabled", false);
-  }).catch(function (error) { // error
-    console.error('getUserMedia error:', error);
-    return;
-  });
-}
+//   if ( (! useVideo) && (! useAudio) ) {
+//     console.warn('NO media to capture');
+//     return;
+//   }
+
+//   getDeviceStream({video: useVideo, audio: useAudio}) // audio: false
+//   .then(function (stream) { // success
+//     console.log('getDeviceStream() Success');
+//     logStream('localStream', stream);
+//     localStream = stream;
+//     playVideo(localVideo, stream);
+//     $('#status_disp').remove();
+//     $('#status').prepend('<div id="status_disp" style="color: grean;">READY</div>');
+//     $("#connect").prop("disabled", false);
+//   }).catch(function (error) { // error
+//     console.error('getUserMedia error:', error);
+//     return;
+//   });
+// }
 
 // stop local video
 function stopVideo() {
@@ -273,7 +371,11 @@ function checkSdp() {
     console.log('checkSdp() Success');
     if(data['status'] == true) {
       receiveSdp = data['sdp'];
-      textToReceiveSdp.value = receiveSdp;
+      
+      let remoteVideo = addRemoteVideoTag(receiveSdp['username']);
+      // textToReceiveSdp.value = receiveSdp;
+      onSdpText(remoteVideo);
+      deleteSdp(data['username']);
       $("#connect").prop("disabled", true);
     }
   }).fail(function(jqXHR, status, errorThrown ) {
@@ -359,7 +461,7 @@ function pauseVideo(element) {
 }
 
 // ----- hand signaling ----
-function onSdpText() {
+function onSdpText(remoteVideo) {
   console.log('onSdpText() ');
   settings['conn'].send(JSON.stringify({command: "subscribe", meeting_id: meeting_id,username: username }));
   // receiveSdp = (receiveSdp != null && receiveSdp != '') ? receiveSdp : textToReceiveSdp.value;
@@ -380,20 +482,23 @@ function onSdpText() {
       type : 'offer',
       sdp : receiveSdp,
     });
-    setOffer(offer);
+    setOffer(offer ,remoteVideo);
   }
   $("#hangUp").prop("disabled", false);
 }
 
-function sendSdp(sessionDescription) {
+function sendSdpData(sessionDescription) {
   console.log('---sending sdp ---');
-  textForSendSdp.value = sessionDescription.sdp;
   let sdp = sessionDescription.sdp;
+  registSdp(sdp);
+}
 
+function registSdp(sdp) {
   let data = {
     "meeting_id": meeting_id,
     "sdp": sdp
   };
+
   $.ajax({
     url:'https://september-rain.com/registsdp/',
     type:"POST",
@@ -406,6 +511,7 @@ function sendSdp(sessionDescription) {
   }).always(function(){
   });
 }
+
 function copySdp() {
   textForSendSdp.focus();
   textForSendSdp.select();
@@ -418,32 +524,42 @@ function _trimTailDoubleLF(str) {
 }
 
 // ---------------------- connection handling -----------------------
-function prepareNewConnection() {
+function prepareNewConnection(remoteVideo) {
   console.log('prepareNewConnection() ');
   let peer = null;
-  let pc_config = {
-    "iceServers": [
-      {
-        "url":"stun:september-rain.com:3478"
-      },
-      {
-        "url": "turn:september-rain.com:3478?transport=udp",
-        "credential": passwd,
-        "username": username
-      },
-      {
-        "url": "turn:september-rain.com:3478?transport=tcp",
-        "credential": passwd,
-        "username": username
-      },
-    ]
-  };
+
   try {
     peer = new RTCPeerConnection(pc_config);
   } catch (e) {
     console.log("Failed to create PeerConnection, exception: " + e.message);
   }
 
+  // --- on get local ICE candidate
+  peer.onicecandidate = function (evt) {
+    console.log('peer.onicecandidate() ');
+    if (evt.candidate) {
+      console.log(evt.candidate);
+      // Trickle ICE の場合は、ICE candidateを相手に送る
+      // Vanilla ICE の場合には、何もしない
+    } else {
+      console.log('empty ice event');
+      // Trickle ICE の場合は、何もしない
+      // Vanilla ICE の場合には、ICE candidateを含んだSDPを相手に送る
+      sendSdpData(peer.localDescription);
+    }
+  };
+
+  if(remoteVideo) {
+    peer = getRemoteStream(peer, remoteVideo);
+  }
+  // -- add local stream --
+  peer = addLoadlStream(peer);
+
+  return peer;
+}
+
+// get remote stream
+function getRemoteStream(peer, remoteVideo){
   // --- on get remote stream ---
   if ('ontrack' in peer) {
     peer.ontrack = function(event) {
@@ -463,23 +579,10 @@ function prepareNewConnection() {
     };
   }
 
-  // --- on get local ICE candidate
-  peer.onicecandidate = function (evt) {
-    console.log('peer.onicecandidate() ');
-    if (evt.candidate) {
-      console.log(evt.candidate);
-      // Trickle ICE の場合は、ICE candidateを相手に送る
-      // Vanilla ICE の場合には、何もしない
-    } else {
-      console.log('empty ice event');
-      // Trickle ICE の場合は、何もしない
-      // Vanilla ICE の場合には、ICE candidateを含んだSDPを相手に送る
-      sendSdp(peer.localDescription);
-    }
-  };
+  return peer;
+}
 
-
-  // -- add local stream --
+function addLoadlStream(peer) {
   if (localStream) {
     console.log('Adding local stream...');
     if ('addTrack' in peer) {
@@ -497,7 +600,6 @@ function prepareNewConnection() {
   else {
     console.warn('no local stream, but continue.');
   }
-
   return peer;
 }
 
@@ -506,7 +608,7 @@ function prepareNewConnection() {
  */
 function makeOffer() {
   console.log('makeOffer() ');
-  peerConnection = prepareNewConnection();
+  peerConnection = prepareNewConnection(null);
 
   let options = {};
 
@@ -530,12 +632,13 @@ function makeOffer() {
 /**
  *　受けたOfferに従いリモートの情報をpeerConnectionにセットする  
  */
-function setOffer(sessionDescription) {
+function setOffer(sessionDescription, remoteVideo) {
   console.log('setOffer() ');
   if (peerConnection) {
     console.error('peerConnection alreay exist!');
   }
-  peerConnection = prepareNewConnection();
+
+  peerConnection = prepareNewConnection(remoteVideo);
   peerConnection.setRemoteDescription(sessionDescription)
   .then(function() {
     console.log('setRemoteDescription:offer succsess in promise');
@@ -618,28 +721,7 @@ function hangUp() {
     peerConnection.close();
     peerConnection = null;
     pauseVideo(remoteVideo);
-
-    let data = {
-      "meeting_id": meeting_id,
-    };
-
-    $.ajax({
-      url:'https://september-rain.com/remove/',
-      type:"POST",
-      data:data,
-      dataType:"json",
-      timespan:1000
-    }).done(function(data,status,jqXHR) {
-      $('#status_disp').remove();
-      $('#status').prepend('<div id="status_disp" style="color: green;">READY</div>');
-      $("#connect").prop("disabled", false);
-      $("#start_video_button").prop("disabled", false);
-      $("#stop_button").prop("disabled", false);
-    }).fail(function(jqXHR, status, errorThrown ) {
-    }).always(function(){
-    });
-  }
-  else {
+  } else {
     console.warn('peer NOT exist.');
   }
 }
@@ -662,7 +744,36 @@ function sleep(waitSec, callbackFunc) {
   }, 1000);
 }
 
-function set_user_info(){
-  username = $('#username').val();
-  passwd = $('#passwd').val();
+function deleteSdp(remote_username){
+  let data = {
+    "meeting_id": meeting_id,
+    "username": remote_username
+  };
+
+  $.ajax({
+    url:'https://september-rain.com/remove/',
+    type:"POST",
+    data:data,
+    dataType:"json",
+    timespan:1000
+  }).done(function(data,status,jqXHR) {
+    $('#status_disp').remove();
+    $('#status').prepend('<div id="status_disp" style="color: green;">READY</div>');
+    $("#connect").prop("disabled", false);
+    $("#start_video_button").prop("disabled", false);
+    $("#stop_button").prop("disabled", false);
+  }).fail(function(jqXHR, status, errorThrown ) {
+  }).always(function(){
+  });
 }
+
+function addRemoteVideoTag(remote_username) {
+  let insert_html = '';
+  let remote_video = 'remote_video_' + remote_username;
+  insert_html += '                <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6">';
+  insert_html += '                  <video id="' + remote_video + '" autoplay="1" style="width: 400px; height: 300px; border: 1px solid black;"></video>';
+  insert_html += '                </div>';
+  $('#user_views').append(insert_html);
+  return remote_video
+}
+

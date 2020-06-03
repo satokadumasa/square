@@ -45,7 +45,7 @@
                   </button>
                 </div>
               </div>
-              <div class='row'>
+              <div class='row' id="user_views">
                 <div class='col-sm-12 col-md-12 col-lg-12 col-xl-12'>
                   <button type="button" onclick="connect();" id="connect" disabled>
                     Connect
@@ -59,9 +59,11 @@
                 <div class='col-sm-12 col-md-12 col-lg-6 col-xl-6'>
                   <video id="local_video" muted="muted" autoplay="1" style="width: 400px; height: 300px; border: 1px solid black;"></video>
                 </div>
+                <!--
                 <div class='col-sm-12 col-md-12 col-lg-6 col-xl-6'>
                   <video id="remote_video" autoplay="1" style="width: 400px; height: 300px; border: 1px solid black;"></video>
                 </div>
+                -->
               </div>
               <input type="hidden" name="text_for_send_sdp" id="text_for_send_sdp">
               <input type="hidden" name="text_for_receive_sdp" id="text_for_receive_sdp">
@@ -82,5 +84,4 @@
               let meeting_id = 0;
               meeting_id = <!----value:Meeting:id---->;
               </script>
-              <script src="/js/chat.js" type="text/javascript"></script>
               <script src="/js/webrtc.js" type="text/javascript"></script>

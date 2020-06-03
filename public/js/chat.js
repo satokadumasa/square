@@ -47,9 +47,12 @@ $(function() {
             let box = $('<div class="box"></div>').html(inner);
           } else {
             $('#text_for_receive_sdp').val(event.data);
-            receiveSdp = event.data;
+            recv_data = JSON.parse(event.data);
+            receiveSdp = recv_data['sdp'];
             if(localVideo){
+              addRemoteVideoTag(remote_username)
               onSdpText();
+              deleteSdp(recv_data['username']);
             }
           }
         }
@@ -91,4 +94,13 @@ $(function() {
     'display' : '#chat'
   });
 });
+
+function addRemoteVideoTag(remote_username) {
+  let insert_html = '';
+  let remote_video = 'remote_video_' + remote_username;
+  insert_html += '                <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6">';
+  insert_html += '                  <video id="' + remote_video + '" autoplay="1" style="width: 400px; height: 300px; border: 1px solid black;"></video>';
+  insert_html += '                </div>';
+  return remote_video
+}
 

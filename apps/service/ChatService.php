@@ -62,7 +62,7 @@ class ChatService implements MessageComponentInterface {
                     $dbh = $dbConnect->createConnection();
                     $meetings = new \Meeting($dbh);
 
-                    $meeting = $meetings->contain([
+                    $data = $meetings->contain([
                         'MeetingRtcSession' => [
                           'RtcSession' => ['User'],
                         ],
@@ -94,21 +94,17 @@ class ChatService implements MessageComponentInterface {
                     $message = [
                         'resourceId' => $conn->resourceId ,
                         'meeting_id' => $recv_data->meeting_id ,
-                        'sdp' => $meeting['RtcSession']['sdp'] ,
+                        'sdp' => $data['RtcSession']['sdp'] ,
                         'username' => $recv_data->username ,
                         'numRecv' => $numRecv ,
                     ];
 
-                    $this->debug->log("ChatService::onMessage() resourceId:" . $conn->resourceId);
-                    $this->debug->log("ChatService::onMessage() subscriptions(2):".print_r($this->subscriptions, true));
                     if (isset($this->subscriptions[$conn->resourceId])) {
                         $target = $this->subscriptions[$conn->resourceId];
                         foreach ($this->subscriptions as $id => $meeting_id) {
-                            $this->debug->log("ChatService::onMessage() user_id[${id}] meeting_id[${meeting_id}]" );
-                            $this->debug->log("ChatService::onMessage() resourceId[".$conn->resourceId."] ");
                             if ($meeting_id == $target && $id != $conn->resourceId) {
-                                $this->debug->log("ChatService::onMessage() user_id[${id}] sdp:" . $meeting['RtcSession']['sdp']);
-                                $this->users[$id]->send($meeting['RtcSession']['sdp']);
+                                $this->debug->log("ChatService::onMessage() user_id[${id}] sdp:" . $data['RtcSession']['sdp']);
+                                $this->users[$id]->send(json_encode($message, JSON_UNESCAPED_UNICODE));
                             }
                         }
                     }

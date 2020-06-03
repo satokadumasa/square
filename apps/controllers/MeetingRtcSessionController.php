@@ -232,7 +232,7 @@ class MeetingRtcSessionController extends \strangerfw\core\controller\BaseContro
 
       $data = $meeting->contain([
         'MeetingRtcSession' => [
-          'RtcSession'
+          'RtcSession' => ['User'],
         ]
       ])
         ->select([
@@ -250,20 +250,18 @@ class MeetingRtcSessionController extends \strangerfw\core\controller\BaseContro
         'RtcSession' => [
           'sdp',
           'status'
-        ]
+        ],
+        'User' => [
+            'username'
+        ],
       ])
         ->where('MeetingRtcSession.meeting_id', '=', $this->request['meeting_id'])
         ->where('RtcSession.user_id', '<>', $session['Auth']['User']['id'])
         ->find('first');
-      $this->debug->log("MeetingRtcSessionController::checksdp() ------------------------------------------------------------");
-      $this->debug->log("MeetingRtcSessionController::checksdp() data:" . print_r($data, true));
-      $this->debug->log("MeetingRtcSessionController::checksdp() ------------------------------------------------------------");
-      $this->debug->log("MeetingRtcSessionController::checksdp() meeting_id".$this->request['meeting_id']);
-      $this->debug->log("MeetingRtcSessionController::checksdp() user_id:".$session['Auth']['User']['id']);
 
       if (isset($data['RtcSession']) && isset($data['RtcSession']['sdp'])) {
-        $this->debug->log("MeetingRtcSessionController::checksdp() find RtcSession:" . print_r($data['RtcSession'], true));
         $result = [
+          'username' => $data['User']['username'],
           'status' => true,
           'sdp' => $data['RtcSession']['sdp']
         ];
@@ -272,6 +270,7 @@ class MeetingRtcSessionController extends \strangerfw\core\controller\BaseContro
           'status' => false
         ];
       }
+      $this->debug->log("MeetingRtcSessionController::checksdp() find RtcSession:" . print_r($result, true));
       $this->debug->log("MeetingRtcSessionController::checksdp() END");
 
       echo json_encode($result, JSON_UNESCAPED_UNICODE);
