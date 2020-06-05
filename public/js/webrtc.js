@@ -32,6 +32,10 @@ let pc_config = {
     },
   ]
 };
+
+let userAgent = window.navigator.userAgent.toLowerCase();
+let os = osType();
+let browser = browserType();
 // --- prefix -----
 navigator.getUserMedia  = navigator.getUserMedia    || navigator.webkitGetUserMedia ||
                           navigator.mozGetUserMedia || navigator.msGetUserMedia;
@@ -43,8 +47,17 @@ $(function(){
   $("#username").text(username);
   console.log('Call checkSdp()');
   checkSdp();
-  console.log('Call getDeviceList()');
-  getDeviceList();
+
+  if(['Win','Mac'].findIndex(item => item === os) > 0 &&
+     ['Crome','Firefox'].findIndex(item => item === browser) > 0)
+  { 
+    console.log('Call getDeviceList()');
+    getDeviceList();
+  } else {
+    console.log('Do not Call getDeviceList()');
+    $("#start_video_button").prop("disabled", false);
+  } 
+    
   // startLocalVideo();
   $('#status').prepend('<div id="status_disp" style="color: read;">WAIT</div>');
   $("#connect").prop("disabled", true);
@@ -529,7 +542,14 @@ function prepareNewConnection(remoteVideo) {
   let peer = null;
 
   try {
-    peer = new RTCPeerConnection(pc_config);
+    if(['Win','Mac'].findIndex(item => item === os) &&
+       ['Crome','Firefox'].findIndex(item => item === browser) 
+    ){
+      peer = new RTCPeerConnection(pc_config);
+    } else {
+      peer = new RTCPeerConnect();
+      pere.setConfiguration(pc_config);
+    }
   } catch (e) {
     console.log("Failed to create PeerConnection, exception: " + e.message);
   }
@@ -774,6 +794,44 @@ function addRemoteVideoTag(remote_username) {
   insert_html += '                  <video id="' + remote_video + '" autoplay="1" style="width: 400px; height: 300px; border: 1px solid black;"></video>';
   insert_html += '                </div>';
   $('#user_views').append(insert_html);
-  return remote_video
+  return remote_video;
+}
+function browserType() {
+  if(userAgent.indexOf('MSIE') != -1 ||
+            userAgent.indexOf('Trident') != -1) {
+    return 'MSIE';
+  } else if(userAgent.indexOf('Edge') != -1) {
+    return 'Edge';
+  } else if(userAgent.indexOf('Chrome') != -1) {
+    return 'Chrome';
+  } else if(userAgent.indexOf('crios') != -1) {
+    return 'Chrome';
+  } else if(userAgent.indexOf('Safari') != -1) {
+    return 'Safari';
+  } else if(userAgent.indexOf('Firefox') != -1) {
+    return 'Firefox';
+  } else if(userAgent.indexOf('Opera') != -1) {
+    return 'Opera';
+  } else {
+    return 'ANY';
+  }
+}
+
+function osType() {
+  if(userAgent.indexOf('Windows') != -1) { 
+    return 'Win';
+  } else if(userAgent.indexOf('Linux') != -1) {
+    return 'Linux';
+  } else if(userAgent.indexOf('mac os x') != -1) {
+    return 'Mac';
+  } else if(userAgent.indexOf('Mac OS X') != -1) {
+    return 'Mac';
+  } else if(userAgent.indexOf('ipad') != -1) {
+    return 'iPad';
+  } else if(userAgent.indexOf('ipad') != -1) {
+    return 'iPad';
+  } else {
+    return 'ANY';
+  }
 }
 
